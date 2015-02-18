@@ -61,19 +61,45 @@ func (u *Unit) SetMeterStatus(codeRaw, info string) error {
 				return nil, jujutxn.ErrNoOperations
 			}
 		}
-		return []txn.Op{
-			{
-				C:      unitsC,
-				Id:     u.doc.DocID,
-				Assert: isAliveDoc,
-			}, {
-				C:      meterStatusC,
-				Id:     u.st.docID(u.globalKey()),
-				Assert: txn.DocExists,
-				Update: bson.D{{"$set", bson.D{{"code", code}, {"info", info}}}},
-			}}, nil
+		return setMeterStatusOp(u, u.st, u.globalKey(), code, info), nil
 	}
 	return errors.Annotatef(u.st.run(buildTxn), "cannot set meter state for unit %s", u.Name())
+}
+
+// TODO (mattyw) Remove the call from the metricmanager - make it use this call.
+// TODO (mattyw) Do this in a single transaction - only on commercial charms
+func (st *State) SetMeterStatusOnAllUnits(codeRaw, info string) error {
+	var ops []txn.Op
+	services, err := st.AllServices()
+	if err != nil {
+		return err
+	}
+	for _, svc := range services {
+		units, err := svc.AllUnits()
+		if err != nil {
+			return err
+		}
+		for _, unit := range units {
+			ops = append(ops, setMeterStatusOp(unit, st, unit.globalKey(), MeterStatusCode(codeRaw), info)...)
+		}
+	}
+	return errors.Annotatef(st.runTransaction(ops), "cannot set meter state for all units")
+}
+
+// setMeterStatusOp returns the operation needed to set the meter status
+// document associated with the given globalKey.
+func setMeterStatusOp(u *Unit, st *State, globalKey string, code MeterStatusCode, info string) []txn.Op {
+	return []txn.Op{
+		{
+			C:      unitsC,
+			Id:     u.doc.DocID,
+			Assert: isAliveDoc,
+		}, {
+			C:      meterStatusC,
+			Id:     st.docID(globalKey),
+			Assert: txn.DocExists,
+			Update: bson.D{{"$set", bson.D{{"code", code}, {"info", info}}}},
+		}}
 }
 
 // createMeterStatusOp returns the operation needed to create the meter status

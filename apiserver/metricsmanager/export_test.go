@@ -10,3 +10,11 @@ import (
 func PatchSender(s metricsender.MetricSender) {
 	sender = s
 }
+
+func SetMaxConsecutiveErrors(c int) func() {
+	oldValue := maxConsecutiveSendErrors
+	maxConsecutiveSendErrors = c
+	return func() {
+		maxConsecutiveSendErrors = oldValue
+	}
+}

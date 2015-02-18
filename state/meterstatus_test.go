@@ -14,6 +14,7 @@ import (
 
 type MeterStateSuite struct {
 	ConnSuite
+	service *state.Service
 	unit    *state.Unit
 	factory *factory.Factory
 }
@@ -22,8 +23,11 @@ var _ = gc.Suite(&MeterStateSuite{})
 
 func (s *MeterStateSuite) SetUpTest(c *gc.C) {
 	s.ConnSuite.SetUpTest(c)
+	var err error
 	s.factory = factory.NewFactory(s.State)
-	s.unit = s.factory.MakeUnit(c, nil)
+	s.service = s.factory.MakeService(c, nil)
+	s.unit, err = s.service.AddUnit()
+	c.Assert(err, jc.ErrorIsNil)
 	c.Assert(s.unit.Series(), gc.Equals, "quantal")
 }
 
@@ -92,4 +96,21 @@ func (s *UnitSuite) TestMeterStatusRemovedWithUnit(c *gc.C) {
 	c.Assert(err, gc.ErrorMatches, "cannot retrieve meter status for unit .*: not found")
 	c.Assert(code, gc.Equals, "NOT AVAILABLE")
 	c.Assert(info, gc.Equals, "")
+}
+
+func (s *MeterStateSuite) TestSetMeterStatusOnAllUnits(c *gc.C) {
+	anotherUnit, err := s.service.AddUnit()
+	c.Assert(err, jc.ErrorIsNil)
+	err = s.unit.SetMeterStatus("GREEN", "Information A")
+	c.Assert(err, jc.ErrorIsNil)
+	err = anotherUnit.SetMeterStatus("GREEN", "Information B")
+	c.Assert(err, jc.ErrorIsNil)
+	err = s.State.SetMeterStatusOnAllUnits("AMBER", "Information C")
+	c.Assert(err, jc.ErrorIsNil)
+	for _, unit := range []*state.Unit{s.unit, anotherUnit} {
+		status, info, err := unit.GetMeterStatus()
+		c.Assert(err, jc.ErrorIsNil)
+		c.Assert(status, gc.Equals, "AMBER")
+		c.Assert(info, gc.Equals, "Information C")
+	}
 }

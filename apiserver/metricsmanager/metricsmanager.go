@@ -17,8 +17,9 @@ import (
 )
 
 var (
-	logger            = loggo.GetLogger("juju.apiserver.metricsmanager")
-	maxBatchesPerSend = 1000
+	logger                   = loggo.GetLogger("juju.apiserver.metricsmanager")
+	maxBatchesPerSend        = 1000
+	maxConsecutiveSendErrors = 3
 
 	sender metricsender.MetricSender = &metricsender.NopSender{}
 )
@@ -39,6 +40,8 @@ type MetricsManagerAPI struct {
 	state *state.State
 
 	accessEnviron common.GetAuthFunc
+
+	consecutiveSendErrors int
 }
 
 var _ MetricsManager = (*MetricsManagerAPI)(nil)
@@ -130,6 +133,16 @@ func (api *MetricsManagerAPI) SendMetrics(args params.Entities) (params.ErrorRes
 		if err != nil {
 			err = errors.Annotate(err, "failed to send metrics")
 			result.Results[i].Error = common.ServerError(err)
+			api.consecutiveSendErrors += 1
+		} else {
+			api.consecutiveSendErrors = 0
+		}
+		if api.consecutiveSendErrors >= maxConsecutiveSendErrors {
+			err := api.state.SetMeterStatusOnAllUnits("AMBER", "lost connection with metric collection service")
+			if err != nil {
+				result.Results[i].Error = common.ServerError(err)
+				return result, err
+			}
 		}
 	}
 	return result, nil
