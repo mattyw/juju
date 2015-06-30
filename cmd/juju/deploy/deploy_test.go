@@ -28,6 +28,7 @@ import (
 	"github.com/juju/juju/api"
 	"github.com/juju/juju/cmd/envcmd"
 	"github.com/juju/juju/cmd/juju/service"
+	cmdtesting "github.com/juju/juju/cmd/juju/testing"
 	"github.com/juju/juju/constraints"
 	"github.com/juju/juju/environs/config"
 	"github.com/juju/juju/instance"
@@ -41,7 +42,7 @@ import (
 
 type DeploySuite struct {
 	testing.RepoSuite
-	CmdBlockHelper
+	cmdtesting.CmdBlockHelper
 }
 
 func (s *DeploySuite) SetUpTest(c *gc.C) {

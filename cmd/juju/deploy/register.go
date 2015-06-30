@@ -10,6 +10,7 @@ import (
 	"net/url"
 
 	"github.com/juju/errors"
+	"github.com/juju/loggo"
 	"github.com/juju/persistent-cookiejar"
 	"gopkg.in/macaroon-bakery.v0/httpbakery"
 
@@ -20,6 +21,7 @@ import (
 var (
 	registerMetricsURL = ""
 	openWebBrowser     = func(_ *url.URL) error { return nil }
+	logger             = loggo.GetLogger("juju.cmd.juju")
 )
 
 type metricRegistrationPost struct {
