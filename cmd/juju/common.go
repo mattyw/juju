@@ -110,7 +110,7 @@ func environFromNameProductionFunc(
 	return env, cleanup, err
 }
 
-// TODO (mattyw) These functions copied
+// TODO (mattyw) These functions copied into common package (from here down)
 // resolveCharmURL resolves the given charm URL string
 // by looking it up in the appropriate charm repository.
 // If it is a charm store charm URL, the given csParams will

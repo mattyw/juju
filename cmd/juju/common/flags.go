@@ -1,7 +1,7 @@
 // Copyright 2015 Canonical Ltd.
 // Licensed under the AGPLv3, see LICENCE file for details.
 
-package main
+package common
 
 import (
 	"fmt"
@@ -12,12 +12,12 @@ import (
 	"github.com/juju/juju/storage"
 )
 
-type storageFlag struct {
+type StorageFlag struct {
 	stores *map[string]storage.Constraints
 }
 
 // Set implements gnuflag.Value.Set.
-func (f storageFlag) Set(s string) error {
+func (f StorageFlag) Set(s string) error {
 	fields := strings.SplitN(s, "=", 2)
 	if len(fields) < 2 {
 		return errors.New("expected <store>=<constraints>")
@@ -34,10 +34,18 @@ func (f storageFlag) Set(s string) error {
 }
 
 // Set implements gnuflag.Value.String.
-func (f storageFlag) String() string {
+func (f StorageFlag) String() string {
 	strs := make([]string, 0, len(*f.stores))
 	for store, cons := range *f.stores {
 		strs = append(strs, fmt.Sprintf("%s=%v", store, cons))
 	}
 	return strings.Join(strs, " ")
+}
+
+func (f StorageFlag) Stores() *map[string]storage.Constraints {
+	return f.stores
+}
+
+func NewStorageFlag(stores *map[string]storage.Constraints) *StorageFlag {
+	return &StorageFlag{stores}
 }

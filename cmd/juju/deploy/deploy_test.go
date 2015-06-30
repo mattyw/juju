@@ -27,6 +27,7 @@ import (
 
 	"github.com/juju/juju/api"
 	"github.com/juju/juju/cmd/envcmd"
+	"github.com/juju/juju/cmd/juju/common"
 	"github.com/juju/juju/cmd/juju/service"
 	cmdtesting "github.com/juju/juju/cmd/juju/testing"
 	"github.com/juju/juju/constraints"
@@ -47,7 +48,7 @@ type DeploySuite struct {
 
 func (s *DeploySuite) SetUpTest(c *gc.C) {
 	s.RepoSuite.SetUpTest(c)
-	s.CmdBlockHelper = NewCmdBlockHelper(s.APIState)
+	s.CmdBlockHelper = cmdtesting.NewCmdBlockHelper(s.APIState)
 	c.Assert(s.CmdBlockHelper, gc.NotNil)
 	s.AddCleanup(func(*gc.C) { s.CmdBlockHelper.Close() })
 }
@@ -489,20 +490,20 @@ func (s *charmStoreSuite) SetUpTest(c *gc.C) {
 	s.PatchValue(&charmrepo.CacheDir, c.MkDir())
 
 	// Point the CLI to the charm store testing server.
-	original := newCharmStoreClient
-	s.PatchValue(&newCharmStoreClient, func() (*csClient, error) {
+	original := common.NewCharmStoreClient
+	s.PatchValue(&common.NewCharmStoreClient, func() (*common.CsClient, error) {
 		csclient, err := original()
 		if err != nil {
 			return nil, err
 		}
-		csclient.params.URL = s.srv.URL()
+		csclient.SetUrl(s.srv.URL())
 		// Add a cookie so that the discharger can detect whether the
 		// HTTP client is the juju environment or the juju client.
 		lurl, err := url.Parse(s.discharger.Location())
 		if err != nil {
 			panic(err)
 		}
-		csclient.params.HTTPClient.Jar.SetCookies(lurl, []*http.Cookie{{
+		csclient.Params().HTTPClient.Jar.SetCookies(lurl, []*http.Cookie{{
 			Name:  clientUserCookie,
 			Value: clientUserName,
 		}})

@@ -11,6 +11,7 @@ import (
 	gc "gopkg.in/check.v1"
 
 	"github.com/juju/juju/cmd/envcmd"
+	"github.com/juju/juju/cmd/juju/deploy"
 	"github.com/juju/juju/cmd/juju/service"
 	cmdtesting "github.com/juju/juju/cmd/testing"
 	"github.com/juju/juju/juju/osenv"
@@ -159,7 +160,7 @@ var deployTests = []struct {
 	},
 }
 
-func initExpectations(com *DeployCommand) {
+func initExpectations(com *deploy.DeployCommand) {
 	if com.CharmName == "" {
 		com.CharmName = "charm-name"
 	}
@@ -172,7 +173,7 @@ func initExpectations(com *DeployCommand) {
 	com.SetEnvName("peckham")
 }
 
-func initDeployCommand(args ...string) (*DeployCommand, error) {
+func initDeployCommand(args ...string) (*deploy.DeployCommand, error) {
 	com := &DeployCommand{}
 	return com, coretesting.InitCommand(envcmd.Wrap(com), args)
 }

@@ -137,7 +137,7 @@ func (c *DeployCommand) SetFlags(f *gnuflag.FlagSet) {
 	f.Var(constraints.ConstraintsValue{Target: &c.Constraints}, "constraints", "set service constraints")
 	f.StringVar(&c.Networks, "networks", "", "bind the service to specific networks")
 	f.StringVar(&c.RepoPath, "repository", os.Getenv(osenv.JujuRepositoryEnvKey), "local charm repository")
-	f.Var(storageFlag{&c.Storage}, "storage", "charm storage constraints")
+	f.Var(common.NewStorageFlag(&c.Storage), "storage", "charm storage constraints")
 }
 
 func (c *DeployCommand) Init(args []string) error {
@@ -185,17 +185,17 @@ func (c *DeployCommand) Run(ctx *cmd.Context) error {
 		return err
 	}
 
-	csClient, err := newCharmStoreClient()
+	csClient, err := common.NewCharmStoreClient()
 	if err != nil {
 		return errors.Trace(err)
 	}
-	defer csClient.jar.Save()
-	curl, repo, err := common.resolveCharmURL(c.CharmName, csClient.params, ctx.AbsPath(c.RepoPath), conf)
+	defer csClient.SaveJar()
+	curl, repo, err := common.ResolveCharmURL(c.CharmName, csClient.Params(), ctx.AbsPath(c.RepoPath), conf)
 	if err != nil {
 		return errors.Trace(err)
 	}
 
-	curl, err = common.addCharmViaAPI(client, ctx, curl, repo, csClient)
+	curl, err = common.AddCharmViaAPI(client, ctx, curl, repo, csClient)
 	if err != nil {
 		return block.ProcessBlockedError(err, block.BlockChange)
 	}
@@ -302,7 +302,7 @@ func (c *DeployCommand) Run(ctx *cmd.Context) error {
 	if err != nil {
 		return err
 	}
-	err = registerMeteredCharm(state, csClient.jar, curl.String(), serviceName, client.EnvironmentUUID())
+	err = registerMeteredCharm(state, csClient.Jar(), curl.String(), serviceName, client.EnvironmentUUID())
 	if err != nil {
 		return err
 	}

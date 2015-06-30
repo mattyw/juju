@@ -27,7 +27,7 @@ import (
 
 var logger = loggo.GetLogger("juju.cmd.juju")
 
-// resolveCharmURL resolves the given charm URL string
+// ResolveCharmURL resolves the given charm URL string
 // by looking it up in the appropriate charm repository.
 // If it is a charm store charm URL, the given csParams will
 // be used to access the charm store repository.
@@ -36,9 +36,9 @@ var logger = loggo.GetLogger("juju.cmd.juju")
 // will be used to add any necessary attributes to the repo
 // and to resolve the default series if possible.
 //
-// resolveCharmURL also returns the charm repository holding
+// ResolveCharmURL also returns the charm repository holding
 // the charm.
-func resolveCharmURL(curlStr string, csParams charmrepo.NewCharmStoreParams, repoPath string, conf *config.Config) (*charm.URL, charmrepo.Interface, error) {
+func ResolveCharmURL(curlStr string, csParams charmrepo.NewCharmStoreParams, repoPath string, conf *config.Config) (*charm.URL, charmrepo.Interface, error) {
 	ref, err := charm.ParseReference(curlStr)
 	if err != nil {
 		return nil, nil, errors.Trace(err)
@@ -76,11 +76,11 @@ func resolveCharmURL(curlStr string, csParams charmrepo.NewCharmStoreParams, rep
 	return curl, repo, nil
 }
 
-// addCharmViaAPI calls the appropriate client API calls to add the
+// AddCharmViaAPI calls the appropriate client API calls to add the
 // given charm URL to state. For non-public charm URLs, this function also
-// handles the macaroon authorization process using the given csClient.
+// handles the macaroon authorization process using the given CsClient.
 // The resulting charm URL of the added charm is displayed on stdout.
-func addCharmViaAPI(client *api.Client, ctx *cmd.Context, curl *charm.URL, repo charmrepo.Interface, csclient *csClient) (*charm.URL, error) {
+func AddCharmViaAPI(client *api.Client, ctx *cmd.Context, curl *charm.URL, repo charmrepo.Interface, csclient *CsClient) (*charm.URL, error) {
 	switch curl.Schema {
 	case "local":
 		ch, err := repo.Get(curl)
@@ -112,24 +112,24 @@ func addCharmViaAPI(client *api.Client, ctx *cmd.Context, curl *charm.URL, repo 
 	return curl, nil
 }
 
-// csClient gives access to the charm store server and provides parameters
+// CsClient gives access to the charm store server and provides parameters
 // for connecting to the charm store.
-type csClient struct {
+type CsClient struct {
 	jar    *cookiejar.Jar
 	params charmrepo.NewCharmStoreParams
 }
 
-// newCharmStoreClient is called to obtain a charm store client
+// NewCharmStoreClient is called to obtain a charm store client
 // including the parameters for connecting to the charm store, and
 // helpers to save the local authorization cookies and to authorize
 // non-public charm deployments. It is defined as a variable so it can
 // be changed for testing purposes.
-var newCharmStoreClient = func() (*csClient, error) {
+var NewCharmStoreClient = func() (*CsClient, error) {
 	jar, client, err := newHTTPClient()
 	if err != nil {
 		return nil, errors.Mask(err)
 	}
-	return &csClient{
+	return &CsClient{
 		jar: jar,
 		params: charmrepo.NewCharmStoreParams{
 			HTTPClient:   client,
@@ -158,7 +158,7 @@ func newHTTPClient() (*cookiejar.Jar, *http.Client, error) {
 // used to add the charm corresponding to the given URL.
 // The macaroon is properly attenuated so that it can only be used to deploy
 // the given charm URL.
-func (c *csClient) authorize(curl *charm.URL) (*macaroon.Macaroon, error) {
+func (c *CsClient) authorize(curl *charm.URL) (*macaroon.Macaroon, error) {
 	client := csclient.New(csclient.Params{
 		URL:          c.params.URL,
 		HTTPClient:   c.params.HTTPClient,
@@ -172,4 +172,23 @@ func (c *csClient) authorize(curl *charm.URL) (*macaroon.Macaroon, error) {
 		return nil, errors.Trace(err)
 	}
 	return m, nil
+}
+
+// SaveJar saves the cookie jar.
+func (c *CsClient) SaveJar() error {
+	return c.jar.Save()
+}
+
+// Jar returns the cookie jar.
+func (c *CsClient) Jar() *cookiejar.Jar {
+	return c.jar
+}
+
+// Params returns the params.
+func (c *CsClient) Params() charmrepo.NewCharmStoreParams {
+	return c.params
+}
+
+func (c *CsClient) SetUrl(url string) {
+	c.params.URL = url
 }

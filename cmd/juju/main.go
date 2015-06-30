@@ -18,6 +18,7 @@ import (
 	"github.com/juju/juju/cmd/juju/block"
 	"github.com/juju/juju/cmd/juju/cachedimages"
 	"github.com/juju/juju/cmd/juju/common"
+	"github.com/juju/juju/cmd/juju/deploy"
 	"github.com/juju/juju/cmd/juju/environment"
 	"github.com/juju/juju/cmd/juju/machine"
 	"github.com/juju/juju/cmd/juju/service"
@@ -116,7 +117,7 @@ func registerCommands(r commandRegistry, ctx *cmd.Context) {
 
 	// Creation commands.
 	r.Register(wrapEnvCommand(&BootstrapCommand{}))
-	r.Register(wrapEnvCommand(&DeployCommand{}))
+	r.Register(wrapEnvCommand(&deploy.DeployCommand{}))
 	r.Register(wrapEnvCommand(&AddRelationCommand{}))
 
 	// Destruction commands.
