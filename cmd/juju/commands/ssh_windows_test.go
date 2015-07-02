@@ -4,7 +4,7 @@
 
 // +build windows
 
-package main
+package commands
 
 // Commands to patch
 var patchedCommands = []string{"scp.cmd", "ssh.cmd"}

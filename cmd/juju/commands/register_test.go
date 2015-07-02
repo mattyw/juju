@@ -1,6 +1,6 @@
 // Copyright 2015 Canonical Ltd. All rights reserved.
 
-package main
+package commands
 
 import (
 	"encoding/json"

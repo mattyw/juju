@@ -6,7 +6,7 @@
 //
 // +build !386
 
-package main
+package commands
 
 import (
 	"flag"

@@ -4,6 +4,6 @@
 
 // +build !windows
 
-package main
+package commands
 
 var bzrHomeFile = ".bazaar/bazaar.conf"
