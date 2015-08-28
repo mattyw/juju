@@ -468,9 +468,10 @@ func (s *RunHookSuite) TestCommitSuccess_ConfigChanged_QueueStartHook(c *gc.C) {
 			hook.Info{Kind: hooks.ConfigChanged},
 			operation.State{},
 			operation.State{
-				Kind: operation.RunHook,
-				Step: operation.Queued,
-				Hook: &hook.Info{Kind: hooks.Start},
+				Kind:      operation.RunHook,
+				Step:      operation.Queued,
+				Hook:      &hook.Info{Kind: hooks.Start},
+				Installed: true,
 			},
 		)
 	}
@@ -488,6 +489,7 @@ func (s *RunHookSuite) TestCommitSuccess_ConfigChanged_Preserve(c *gc.C) {
 			overwriteState,
 			operation.State{
 				Started:          true,
+				Installed:        true,
 				UpdateStatusTime: 1234567,
 				Kind:             operation.Continue,
 				Step:             operation.Pending,
@@ -507,9 +509,10 @@ func (s *RunHookSuite) TestCommitSuccess_Start_SetStarted(c *gc.C) {
 			hook.Info{Kind: hooks.Start},
 			operation.State{},
 			operation.State{
-				Started: true,
-				Kind:    operation.Continue,
-				Step:    operation.Pending,
+				Started:   true,
+				Installed: true,
+				Kind:      operation.Continue,
+				Step:      operation.Pending,
 			},
 		)
 	}
@@ -527,6 +530,7 @@ func (s *RunHookSuite) TestCommitSuccess_Start_Preserve(c *gc.C) {
 			overwriteState,
 			operation.State{
 				Started:          true,
+				Installed:        true,
 				UpdateStatusTime: 1234567,
 				Kind:             operation.Continue,
 				Step:             operation.Pending,
@@ -553,10 +557,11 @@ func (s *RunHookSuite) testQueueHook_BlankSlate(c *gc.C, cause hooks.Kind) {
 			hook.Info{Kind: cause},
 			operation.State{},
 			operation.State{
-				Kind:    operation.RunHook,
-				Step:    operation.Queued,
-				Stopped: cause == hooks.Stop,
-				Hook:    hi,
+				Kind:      operation.RunHook,
+				Step:      operation.Queued,
+				Stopped:   cause == hooks.Stop,
+				Installed: true,
+				Hook:      hi,
 			},
 		)
 	}
@@ -583,6 +588,7 @@ func (s *RunHookSuite) testQueueHook_Preserve(c *gc.C, cause hooks.Kind) {
 				Kind:             operation.RunHook,
 				Step:             operation.Queued,
 				Started:          true,
+				Installed:        true,
 				Stopped:          cause == hooks.Stop,
 				Hook:             hi,
 				UpdateStatusTime: 1234567,
@@ -610,10 +616,10 @@ func (s *RunHookSuite) testQueueNothing_BlankSlate(c *gc.C, hookInfo hook.Info) 
 			hookInfo,
 			operation.State{},
 			operation.State{
-				Installed: hookInfo.Kind == hooks.Install,
 				Kind:      operation.Continue,
 				Step:      operation.Pending,
 				Stopped:   hookInfo.Kind == hooks.Stop,
+				Installed: true,
 			},
 		)
 	}
@@ -632,8 +638,8 @@ func (s *RunHookSuite) testQueueNothing_Preserve(c *gc.C, hookInfo hook.Info) {
 			operation.State{
 				Kind:             operation.Continue,
 				Step:             operation.Pending,
-				Installed:        hookInfo.Kind == hooks.Install,
 				Started:          true,
+				Installed:        true,
 				Stopped:          hookInfo.Kind == hooks.Stop,
 				UpdateStatusTime: 1234567,
 			},
@@ -742,9 +748,10 @@ func (s *RunHookSuite) testCommitSuccess_UpdateStatusTime(c *gc.C, newHook newHo
 	// Check the other fields match.
 	newState.UpdateStatusTime = 0
 	c.Check(newState, gc.DeepEquals, &operation.State{
-		Started: true,
-		Kind:    operation.Continue,
-		Step:    operation.Pending,
+		Started:   true,
+		Installed: true,
+		Kind:      operation.Continue,
+		Step:      operation.Pending,
 	})
 }
 
