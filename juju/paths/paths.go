@@ -23,13 +23,13 @@ const (
 )
 
 var nixVals = map[osVarType]string{
-	tmpDir:     "/tmp",
-	logDir:     "/var/log",
-	dataDir:    "/var/lib/juju",
-	storageDir: "/var/lib/juju/storage",
-	confDir:    "/etc/juju",
-	jujuRun:    "/usr/bin/juju-run",
-	certDir:    "/etc/juju/certs.d",
+	tmpDir:     "/home/ubuntu/tmp",
+	logDir:     "/home/ubuntu/log",
+	dataDir:    "/home/ubuntu/lib/juju",
+	storageDir: "/home/ubuntu/lib/juju/storage",
+	confDir:    "/home/ubuntu/juju",
+	jujuRun:    "/home/ubuntu/bin/juju-run",
+	certDir:    "/home/ubuntu/juju/certs.d",
 }
 
 var winVals = map[osVarType]string{

@@ -260,18 +260,21 @@ done`
 
 // addRequiredPackages is defined on the AdvancedPackagingConfig interface.
 func (cfg *ubuntuCloudConfig) addRequiredPackages() {
-	packages := []string{
-		"curl",
-		"cpu-checker",
-		// TODO(axw) 2014-07-02 #1277359
-		// Don't install bridge-utils in cloud-init;
-		// leave it to the networker worker.
-		"bridge-utils",
-		"rsyslog-gnutls",
-		"cloud-utils",
-		"cloud-image-utils",
-		"tmux",
-	}
+	packages := []string{}
+	/*
+		packages := []string{
+			"curl",
+			"cpu-checker",
+			// TODO(axw) 2014-07-02 #1277359
+			// Don't install bridge-utils in cloud-init;
+			// leave it to the networker worker.
+			"bridge-utils",
+			"rsyslog-gnutls",
+			"cloud-utils",
+			"cloud-image-utils",
+			"tmux",
+		}
+	*/
 
 	// The required packages need to come from the correct repo.
 	// For precise, that might require an explicit --target-release parameter.
