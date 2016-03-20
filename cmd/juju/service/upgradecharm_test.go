@@ -43,7 +43,7 @@ func (s *UpgradeCharmErrorsSuite) SetUpTest(c *gc.C) {
 	handler, err := charmstore.NewServer(s.Session.DB("juju-testing"), nil, "", charmstore.ServerParams{
 		AuthUsername: "test-user",
 		AuthPassword: "test-password",
-	}, charmstore.V4)
+	}, charmstore.V5)
 	c.Assert(err, jc.ErrorIsNil)
 	s.handler = handler
 	s.srv = httptest.NewServer(handler)
