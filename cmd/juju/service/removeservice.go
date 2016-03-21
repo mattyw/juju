@@ -121,16 +121,11 @@ func (c *removeServiceCommand) removeAllocation(ctx *cmd.Context) error {
 	}
 
 	modelUUID := client.ModelUUID()
-	httpClient, err := c.HTTPClient()
+	bakeryClient, err := c.BakeryClient()
 	if err != nil {
 		return errors.Trace(err)
 	}
-	bClient, err := getBudgetAPIClient(ctx, httpClient)
-	if err != nil {
-		return errors.Trace(err)
-	}
-
-	resp, err := bClient.DeleteAllocation(modelUUID, c.ServiceName)
+	resp, err := deleteBudgetAllocation(bakeryClient, modelUUID, c.ServiceName)
 	if wireformat.IsNotAvail(err) {
 		fmt.Fprintf(ctx.Stdout, "WARNING: Allocation not removed - %s.\n", err.Error())
 	} else if err != nil {
@@ -142,20 +137,6 @@ func (c *removeServiceCommand) removeAllocation(ctx *cmd.Context) error {
 	return nil
 }
 
-var getBudgetAPIClient = getBudgetAPIClientImpl
-
-func getBudgetAPIClientImpl(ctx *cmd.Context, client *http.Client) (budgetAPIClient, error) {
-	filler := &form.IOFiller{
-		In:  ctx.Stdin,
-		Out: ctx.Stderr,
-	}
-	bakeryClient := &httpbakery.Client{
-		Client:       client,
-		VisitWebPage: ussologin.VisitWebPage(filler, client, tokenStore())}
-	c := budget.NewClient(bakeryClient)
-	return c, nil
-}
-
-type budgetAPIClient interface {
-	DeleteAllocation(string, string) (string, error)
+var deleteBudgetAllocation = func(client *httpbakery.Client, uuid string, service string) (string, error) {
+	return budget.NewClient(client).DeleteAllocation(uuid, service)
 }
