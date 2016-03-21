@@ -51,8 +51,9 @@ func (cs charmstoreSpec) Connect(ctx *cmd.Context) (*charmstore.Client, error) {
 			Out: ctx.Stderr,
 		}
 		visitWebPage = ussologin.VisitWebPage(
-			filler,
+			"juju",
 			&http.Client{},
+			filler,
 			jujuclient.NewTokenStore(),
 		)
 	}

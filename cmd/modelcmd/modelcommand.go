@@ -318,8 +318,9 @@ func (w *modelCommandWrapper) Run(ctx *cmd.Context) error {
 	}
 	w.ModelCommand.setVisitWebPage(
 		ussologin.VisitWebPage(
-			filler,
+			"juju",
 			&http.Client{},
+			filler,
 			jujuclient.NewTokenStore(),
 		))
 	return w.ModelCommand.Run(ctx)
