@@ -10,14 +10,12 @@ import (
 
 	"github.com/juju/cmd"
 	"github.com/juju/errors"
-	"github.com/juju/idmclient/ussologin"
 	"github.com/juju/persistent-cookiejar"
 	"gopkg.in/juju/charmrepo.v2-unstable"
-	"gopkg.in/juju/environschema.v1/form"
 	"gopkg.in/macaroon-bakery.v1/httpbakery"
 
 	"github.com/juju/juju/charmstore"
-	"github.com/juju/juju/jujuclient"
+	"github.com/juju/juju/cmd/modelcmd"
 )
 
 // TODO(ericsnow) Factor out code from cmd/juju/commands/common.go and
@@ -44,27 +42,15 @@ func newCharmstoreSpec() CharmstoreSpec {
 
 // Connect implements CharmstoreSpec.
 func (cs charmstoreSpec) Connect(ctx *cmd.Context) (*charmstore.Client, error) {
-	visitWebPage := httpbakery.OpenWebBrowser
-	if ctx != nil {
-		filler := &form.IOFiller{
-			In:  ctx.Stdin,
-			Out: ctx.Stderr,
-		}
-		visitWebPage = ussologin.VisitWebPage(
-			filler,
-			&http.Client{},
-			jujuclient.NewTokenStore(),
-		)
-	}
-	apiContext, err := newAPIContext(visitWebPage)
+	apiContext, err := modelcmd.NewAPIContext(ctx)
 	if err != nil {
 		return nil, errors.Trace(err)
 	}
 
 	client := charmstore.NewClient(charmstore.ClientConfig{
 		charmrepo.NewCharmStoreParams{
-			HTTPClient:   apiContext.HTTPClient(),
-			VisitWebPage: visitWebPage,
+			HTTPClient:   apiContext.BakeryClient.Client,
+			VisitWebPage: apiContext.BakeryClient.VisitWebPage,
 		},
 	})
 	client.Closer = apiContext

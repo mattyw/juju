@@ -41,8 +41,8 @@ type ModelAPI interface {
 type JujuCommandBase struct {
 	cmd.CommandBase
 	cmdContext *cmd.Context
-	apiContext   *APIContext
-	modelApi     ModelAPI
+	apiContext *APIContext
+	modelApi   ModelAPI
 }
 
 // closeContext closes the command's API context
@@ -156,7 +156,7 @@ func (c *JujuCommandBase) initAPIContext() error {
 	return nil
 }
 
-func (c *JujuCommandBase) setCmdContext(ctx *cmd.Context) {	
+func (c *JujuCommandBase) setCmdContext(ctx *cmd.Context) {
 	c.cmdContext = ctx
 }
 

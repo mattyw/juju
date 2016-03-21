@@ -1,13 +1,14 @@
 package modelcmd
+
 import (
 	"net/http"
 	"os"
 
-	"github.com/juju/persistent-cookiejar"
-	"gopkg.in/macaroon-bakery.v1/httpbakery"
-	"gopkg.in/juju/environschema.v1/form"
-	"github.com/juju/idmclient/ussologin"
 	"github.com/juju/errors"
+	"github.com/juju/idmclient/ussologin"
+	"github.com/juju/persistent-cookiejar"
+	"gopkg.in/juju/environschema.v1/form"
+	"gopkg.in/macaroon-bakery.v1/httpbakery"
 
 	"github.com/juju/cmd"
 	"github.com/juju/juju/jujuclient"
@@ -16,7 +17,7 @@ import (
 // APIContext holds the context required for making connections to
 // APIs used by juju.
 type APIContext struct {
-	Jar *cookiejar.Jar
+	Jar          *cookiejar.Jar
 	BakeryClient *httpbakery.Client
 }
 
@@ -53,11 +54,10 @@ func NewAPIContext(ctxt *cmd.Context) (*APIContext, error) {
 		client.VisitWebPage = httpbakery.OpenWebBrowser
 	}
 	return &APIContext{
-		Jar:    jar,
+		Jar:          jar,
 		BakeryClient: client,
 	}, nil
 }
-
 
 // cookieFile returns the path to the cookie used to store authorization
 // macaroons. The returned value can be overridden by setting the
