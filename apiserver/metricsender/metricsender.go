@@ -60,6 +60,10 @@ func handleResponse(mm *state.MetricsManager, st ModelBackend, response wireform
 // over the MetricSender interface in batches
 // no larger than batchSize.
 func SendMetrics(st ModelBackend, sender MetricSender, clock clock.Clock, batchSize int, transmitVendorMetrics bool) error {
+	slaCreds, err := st.SLACredential()
+	if err != nil {
+		return errors.Trace(err)
+	}
 	metricsManager, err := st.MetricsManager()
 	if err != nil {
 		return errors.Trace(err)
@@ -89,7 +93,7 @@ func SendMetrics(st ModelBackend, sender MetricSender, clock clock.Clock, batchS
 				heldBatches = append(heldBatches, m.UUID())
 				heldBatchUnits[m.Unit()] = true
 			} else {
-				wireData = append(wireData, ToWire(m))
+				wireData = append(wireData, ToWire(m, slaCreds))
 			}
 		}
 		response, err := sender.Send(wireData)
@@ -166,7 +170,7 @@ func DefaultMetricSender() MetricSender {
 
 // ToWire converts the state.MetricBatch into a type
 // that can be sent over the wire to the collector.
-func ToWire(mb *state.MetricBatch) *wireformat.MetricBatch {
+func ToWire(mb *state.MetricBatch, SLACreds []byte) *wireformat.MetricBatch {
 	metrics := make([]wireformat.Metric, len(mb.Metrics()))
 	for i, m := range mb.Metrics() {
 		metrics[i] = wireformat.Metric{
@@ -176,12 +180,13 @@ func ToWire(mb *state.MetricBatch) *wireformat.MetricBatch {
 		}
 	}
 	return &wireformat.MetricBatch{
-		UUID:        mb.UUID(),
-		ModelUUID:   mb.ModelUUID(),
-		UnitName:    mb.Unit(),
-		CharmUrl:    mb.CharmURL(),
-		Created:     mb.Created().UTC(),
-		Metrics:     metrics,
-		Credentials: mb.Credentials(),
+		UUID:           mb.UUID(),
+		ModelUUID:      mb.ModelUUID(),
+		UnitName:       mb.Unit(),
+		CharmUrl:       mb.CharmURL(),
+		Created:        mb.Created().UTC(),
+		Metrics:        metrics,
+		Credentials:    mb.Credentials(),
+		SLACredentials: SLACreds,
 	}
 }

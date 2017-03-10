@@ -2181,6 +2181,14 @@ func (st *State) SLALevel() (string, error) {
 	return model.SLALevel(), nil
 }
 
+func (st *State) SLACredential() ([]byte, error) {
+	model, err := st.Model()
+	if err != nil {
+		return []byte{}, errors.Trace(err)
+	}
+	return model.SLACredential(), nil
+}
+
 var tagPrefix = map[byte]string{
 	'm': names.MachineTagKind + "-",
 	'a': names.ApplicationTagKind + "-",

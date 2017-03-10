@@ -127,13 +127,16 @@ func (c *supportCommand) Run(ctx *cmd.Context) error {
 	if err != nil {
 		return errors.Trace(err)
 	}
-	client := newSlaClient(root)
-	modelId := modelId(root)
+	client := modelconfig.NewClient(root)
 
 	if c.Level == "" {
 		return displayCurrentLevel(client, ctx)
 	}
-	credentials, err := c.requestSupportCredentials(modelId)
+	modelTag, ok := root.ModelTag()
+	if !ok {
+		return errors.Errorf("failed to obtain model uuid")
+	}
+	credentials, err := c.requestSupportCredentials(modelTag.Id())
 	if err != nil {
 		return errors.Trace(err)
 	}
