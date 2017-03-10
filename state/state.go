@@ -2181,6 +2181,7 @@ func (st *State) SLALevel() (string, error) {
 	return model.SLALevel(), nil
 }
 
+// SLACredential returns the SLA level of the current connected model.
 func (st *State) SLACredential() ([]byte, error) {
 	model, err := st.Model()
 	if err != nil {
