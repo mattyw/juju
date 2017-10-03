@@ -487,6 +487,7 @@ var commandNames = []string{
 	"remove-unit",
 	"remove-user",
 	"resolved",
+	"resolve",
 	"resources",
 	"restore-backup",
 	"retry-provisioning",
